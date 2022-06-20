@@ -1,8 +1,7 @@
 ﻿using System;
+using WebApi.BLL.Models;
 
 namespace WebApi.BLL
 {
-    public class Class1
-    {
-    }
+
 }
