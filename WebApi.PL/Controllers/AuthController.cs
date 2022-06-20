@@ -6,10 +6,7 @@ namespace WebApi.PL.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        [HttpGet]
-        public IActionResult Get()
-        {
-            return Ok("Hello World");
-        }
+        public int MyProperty { get; set; }
+
     }
 }
