@@ -99,6 +99,9 @@ namespace WebApi.PL
                 options.SuppressModelStateInvalidFilter = true;
             });
 
+            //configure jwtservice
+            services.AddScoped<IJwtCreationService, JwtCreationService>();
+
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
