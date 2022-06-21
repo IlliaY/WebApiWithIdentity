@@ -28,7 +28,7 @@ namespace WebApi.BLL.Services
             this.jwtCreationService = jwtCreationService;
         }
 
-        public async Task<JwtSecurityToken> LoginAsync(UserLoginModel userLogin)
+        public async Task<Response> LoginAsync(UserLoginModel userLogin)
         {
             var user = await userManager.FindByNameAsync(userLogin.UserName);
             if (user == null || !await userManager.CheckPasswordAsync(user, userLogin.Password))
@@ -49,9 +49,15 @@ namespace WebApi.BLL.Services
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
+            var handler = new JwtSecurityTokenHandler();
+
             var token = jwtCreationService.GenerateToken(claims);
 
-            return token;
+            return new Response
+            {
+                Status = "Success",
+                Message = handler.WriteToken(token)
+            };
         }
 
         public async Task<Response> RegisterAsync(UserRegisterModel userRegister)
