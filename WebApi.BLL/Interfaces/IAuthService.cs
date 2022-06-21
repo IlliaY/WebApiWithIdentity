@@ -8,5 +8,7 @@ namespace WebApi.BLL.Interfaces
     {
         Task<Response> LoginAsync(UserLoginModel userLogin);
         Task<Response> RegisterAsync(UserRegisterModel userRegister);
+
+        Task<Response> RegisterAdminAsync(UserRegisterModel userRegister);
     }
 }

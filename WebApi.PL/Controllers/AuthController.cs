@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.BLL.Interfaces;
 using WebApi.BLL.Models;
@@ -38,11 +39,29 @@ namespace WebApi.PL.Controllers
 
         [HttpPost]
         [Route("Login")]
+        [ValidationFilter]
         public async Task<IActionResult> Login(UserLoginModel userLogin)
         {
             try
             {
                 var response = await authService.LoginAsync(userLogin);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [Route("RegisterAdmin")]
+        [ValidationFilter]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RegisterAdmin(UserRegisterModel userRegister)
+        {
+            try
+            {
+                var response = await authService.RegisterAdminAsync(userRegister);
                 return Ok(response);
             }
             catch (Exception ex)

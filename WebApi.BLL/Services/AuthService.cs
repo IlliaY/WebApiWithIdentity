@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -60,6 +61,7 @@ namespace WebApi.BLL.Services
             };
         }
 
+
         public async Task<Response> RegisterAsync(UserRegisterModel userRegister)
         {
             var userExists = await userManager.FindByNameAsync(userRegister.UserName);
@@ -102,5 +104,39 @@ namespace WebApi.BLL.Services
 
             return new Response() { Status = "Success", Message = "User created successfully!" };
         }
+
+        public async Task<Response> RegisterAdminAsync(UserRegisterModel userRegister)
+        {
+            var adminExists = await userManager.FindByNameAsync(userRegister.UserName);
+
+            if (adminExists != null)
+            {
+                throw new Exception("Admin already exists");
+            }
+
+            IdentityUser user = new IdentityUser
+            {
+                UserName = userRegister.UserName,
+                Email = userRegister.Email,
+                SecurityStamp = Guid.NewGuid().ToString()
+            };
+
+            var result = await userManager.CreateAsync(user, userRegister.Password);
+
+            if (!result.Succeeded)
+            {
+                throw new Exception("Error creating user");
+            }
+
+            if (!await roleManager.RoleExistsAsync("Admin"))
+            {
+                await roleManager.CreateAsync(new IdentityRole("Admin"));
+            }
+
+            await userManager.AddToRoleAsync(user, "Admin");
+
+            return new Response() { Status = "Success", Message = "Admin created successfully!" };
+        }
+
     }
 }
