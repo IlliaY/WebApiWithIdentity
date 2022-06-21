@@ -47,6 +47,10 @@ namespace WebApi.PL
                     });
             });
 
+            //add identity
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationContext>();
+
             //add authentication
             services.AddAuthentication(options =>
             {
@@ -78,10 +82,6 @@ namespace WebApi.PL
 
             //add swagger
             services.AddSwaggerGen();
-
-            //add identity
-            services.AddIdentity<IdentityUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationContext>();
 
             //add unit of work
             services.AddScoped<IUnitOfWork, UnitOfWork>();
