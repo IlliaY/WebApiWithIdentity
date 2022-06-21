@@ -8,11 +8,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using WebApi.BLL.Interfaces;
+using WebApi.BLL.Services;
 using WebApi.DAL.Data;
 using WebApi.DAL.Interfaces;
 
@@ -85,6 +88,17 @@ namespace WebApi.PL
 
             //add users manager
             services.AddScoped<UserManager<IdentityUser>, UserManager<IdentityUser>>();
+
+            //add AuthService
+            services.AddScoped<IAuthService, AuthService>();
+
+            //configure apibehavior
+            services.Configure<ApiBehaviorOptions>(
+                options =>
+            {
+                options.SuppressModelStateInvalidFilter = true;
+            });
+
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

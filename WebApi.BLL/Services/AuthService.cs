@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -69,7 +70,29 @@ namespace WebApi.BLL.Services
 
             var result = await userManager.CreateAsync(user, userRegister.Password);
 
-            return new Response() { Status = "Succes", Message = result.Errors.ToString() };
+            if (!result.Succeeded)
+            {
+                throw new Exception("Error creating user");
+            }
+
+            if (!result.Succeeded)
+            {
+                var errorList = new List<string>();
+                foreach (var error in result.Errors)
+                {
+                    errorList.Add(error.Description);
+                }
+                throw new Exception(JsonSerializer.Serialize(errorList));
+            }
+
+            if (!await roleManager.RoleExistsAsync("User"))
+            {
+                await roleManager.CreateAsync(new IdentityRole("User"));
+            }
+
+            await userManager.AddToRoleAsync(user, "User");
+
+            return new Response() { Status = "Success", Message = "User created successfully!" };
         }
 
         private JwtSecurityToken GetToken(List<Claim> claims)
