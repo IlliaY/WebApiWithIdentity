@@ -28,31 +28,48 @@ namespace WebApi.BLL.Services
         public async Task<JwtSecurityToken> LoginAsync(UserLoginModel userLogin)
         {
             var user = await userManager.FindByNameAsync(userLogin.UserName);
-            if (user != null && await userManager.CheckPasswordAsync(user, userLogin.Password))
+            if (user == null || !await userManager.CheckPasswordAsync(user, userLogin.Password))
             {
-                var userRoles = await userManager.GetRolesAsync(user);
+                throw new Exception("Invalid username or password");
+            }
+            var userRoles = await userManager.GetRolesAsync(user);
 
-                var claims = new List<Claim>
+            var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.Id),
                     new Claim(ClaimTypes.Name, user.UserName),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 };
 
-                foreach (var role in userRoles)
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, role));
-                }
-
-                var token = GetToken(claims);
-
-                return token;
+            foreach (var role in userRoles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
             }
+
+            var token = GetToken(claims);
+
+            return token;
         }
 
-        public Task<string> Register(UserRegisterModel userRegister)
+        public async Task<Response> RegisterAsync(UserRegisterModel userRegister)
         {
-            throw new System.NotImplementedException();
+            var userExists = await userManager.FindByNameAsync(userRegister.UserName);
+
+            if (userExists != null)
+            {
+                throw new Exception("User already exists");
+            }
+
+            IdentityUser user = new IdentityUser
+            {
+                UserName = userRegister.UserName,
+                Email = userRegister.Email,
+                SecurityStamp = Guid.NewGuid().ToString()
+            };
+
+            var result = await userManager.CreateAsync(user, userRegister.Password);
+
+            return new Response() { Status = "Succes", Message = result.Errors.ToString() };
         }
 
         private JwtSecurityToken GetToken(List<Claim> claims)

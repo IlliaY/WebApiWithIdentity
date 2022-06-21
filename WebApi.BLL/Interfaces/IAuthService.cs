@@ -7,6 +7,6 @@ namespace WebApi.BLL.Interfaces
     public interface IAuthService
     {
         Task<JwtSecurityToken> LoginAsync(UserLoginModel userLogin);
-        Task<string> Register(UserRegisterModel userRegister);
+        Task<Response> RegisterAsync(UserRegisterModel userRegister);
     }
 }
