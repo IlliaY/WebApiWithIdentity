@@ -18,12 +18,14 @@ namespace WebApi.BLL.Services
         private readonly UserManager<IdentityUser> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly IConfiguration configuration;
+        private readonly IJwtCreationService jwtCreationService;
 
-        public AuthService(RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager, IConfiguration configuration)
+        public AuthService(RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager, IConfiguration configuration, IJwtCreationService jwtCreationService)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
             this.configuration = configuration;
+            this.jwtCreationService = jwtCreationService;
         }
 
         public async Task<JwtSecurityToken> LoginAsync(UserLoginModel userLogin)
@@ -47,7 +49,7 @@ namespace WebApi.BLL.Services
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
-            var token = GetToken(claims);
+            var token = jwtCreationService.GenerateToken(claims);
 
             return token;
         }
@@ -93,21 +95,6 @@ namespace WebApi.BLL.Services
             await userManager.AddToRoleAsync(user, "User");
 
             return new Response() { Status = "Success", Message = "User created successfully!" };
-        }
-
-        private JwtSecurityToken GetToken(List<Claim> claims)
-        {
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:SecretKey"]));
-
-            var token = new JwtSecurityToken(
-                issuer: configuration["JWT:Issuer"],
-                audience: configuration["JWT:Audience"],
-                expires: DateTime.Now.AddHours(3),
-                claims: claims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-                );
-
-            return token;
         }
     }
 }
