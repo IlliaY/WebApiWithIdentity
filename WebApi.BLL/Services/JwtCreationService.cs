@@ -18,10 +18,19 @@ namespace WebApi.BLL.Interfaces
             this.configuration = configuration;
         }
 
+        /// <summary>
+        /// We are creating a new JWT token with the claims that we passed in
+        /// </summary>
+        /// <param name="claims">The claims that we want to pass in the token.</param>
+        /// <returns>
+        /// A JWT token.
+        /// </returns>
         public JwtSecurityToken GenerateToken(List<Claim> claims)
         {
+            /* Creating a new SymmetricSecurityKey object with the secret key that we passed in. */
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:SecretKey"]));
 
+            /* Creating a new JWT token with the claims that we passed in. */
             var token = new JwtSecurityToken(
                 issuer: configuration["JWT:Issuer"],
                 audience: configuration["JWT:Audience"],

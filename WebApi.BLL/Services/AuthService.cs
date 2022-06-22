@@ -29,6 +29,14 @@ namespace WebApi.BLL.Services
             this.jwtCreationService = jwtCreationService;
         }
 
+        /// <summary>
+        /// Method takes a username and password, checks if the user exists and if the password is correct, then
+        /// creates a JWT token with the user's roles and returns it
+        /// </summary>
+        /// <param name="UserLoginModel">This is a model class that contains the username and password.</param>
+        /// <returns>
+        /// Response object with status and message with token
+        /// </returns>
         public async Task<Response> LoginAsync(UserLoginModel userLogin)
         {
             var user = await userManager.FindByNameAsync(userLogin.UserName);
@@ -62,6 +70,13 @@ namespace WebApi.BLL.Services
         }
 
 
+        /// <summary>
+        /// Method creates a new user, adds the user to the "User" role, and returns a response object
+        /// </summary>
+        /// <param name="UserRegisterModel"></param>
+        /// <returns>
+        /// A response object with a status and message.
+        /// </returns>
         public async Task<Response> RegisterAsync(UserRegisterModel userRegister)
         {
             var userExists = await userManager.FindByNameAsync(userRegister.UserName);
@@ -105,6 +120,14 @@ namespace WebApi.BLL.Services
             return new Response() { Status = "Success", Message = "User created successfully!" };
         }
 
+        /// <summary>
+        /// Method creates a new user with the role of Admin
+        /// </summary>
+        /// <param name="UserRegisterModel">This is a model class that contains the properties of the
+        /// user that we want to register.</param>
+        /// <returns>
+        /// A response object with a status and message.
+        /// </returns>
         public async Task<Response> RegisterAdminAsync(UserRegisterModel userRegister)
         {
             var adminExists = await userManager.FindByNameAsync(userRegister.UserName);

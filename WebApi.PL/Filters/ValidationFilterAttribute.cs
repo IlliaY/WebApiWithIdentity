@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace WebApi.PL.Filters
 {
+    /* If the model state is not valid, return a bad request with the model state errors */
     public class ValidationFilterAttribute : ActionFilterAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext context)

@@ -21,6 +21,15 @@ namespace WebApi.PL.Controllers
             this.authService = authService;
         }
 
+        /// <summary>
+        /// The Register method is a POST method that takes in a UserRegisterModel object, validates
+        /// it, and then calls the RegisterAsync function in the AuthService
+        /// </summary>
+        /// <param name="UserRegisterModel">This is the model that will be used to register a
+        /// user.</param>
+        /// <returns>
+        /// The response is being returned.
+        /// </returns>
         [HttpPost]
         [Route("Register")]
         [ValidationFilter]
@@ -37,6 +46,15 @@ namespace WebApi.PL.Controllers
             }
         }
 
+        /// <summary>
+        /// Method takes a userLogin object, validates it, and then calls the LoginAsync function in the
+        /// authService
+        /// </summary>
+        /// <param name="UserLoginModel">This is the model that will be used to validate the user's
+        /// login credentials.</param>
+        /// <returns>
+        /// The response is being returned.
+        /// </returns>
         [HttpPost]
         [Route("Login")]
         [ValidationFilter]
@@ -53,6 +71,14 @@ namespace WebApi.PL.Controllers
             }
         }
 
+        /// <summary>
+        /// This method is used to register a new admin user
+        /// </summary>
+        /// <param name="UserRegisterModel">This is the model that will be used to register a
+        /// user.</param>
+        /// <returns>
+        /// The response is being returned.
+        /// </returns>
         [HttpPost]
         [Route("RegisterAdmin")]
         [ValidationFilter]
