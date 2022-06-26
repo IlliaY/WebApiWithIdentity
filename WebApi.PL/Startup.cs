@@ -39,6 +39,7 @@ namespace WebApi.PL
             services.AddProblemDetails(options =>
             {
                 options.MapFluentValidationException();
+                options.IncludeExceptionDetails = (con, action) => false;
             });
 
             //add cors
