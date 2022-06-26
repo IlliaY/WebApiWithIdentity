@@ -1,8 +1,7 @@
 namespace WebApi.BLL.Models
 {
-    public class Response
+    public class MessageDTO
     {
-        public string Status { get; set; }
         public string Message { get; set; }
     }
 }

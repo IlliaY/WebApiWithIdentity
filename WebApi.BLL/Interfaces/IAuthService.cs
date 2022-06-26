@@ -6,9 +6,9 @@ namespace WebApi.BLL.Interfaces
 {
     public interface IAuthService
     {
-        Task<Response> LoginAsync(UserLoginModel userLogin);
-        Task<Response> RegisterAsync(UserRegisterModel userRegister);
+        Task<TokenDTO> LoginAsync(UserLoginModel userLogin);
+        Task<MessageDTO> RegisterAsync(UserRegisterModel userRegister);
 
-        Task<Response> RegisterAdminAsync(UserRegisterModel userRegister);
+        Task<MessageDTO> RegisterAdminAsync(UserRegisterModel userRegister);
     }
 }

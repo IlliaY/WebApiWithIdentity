@@ -37,7 +37,7 @@ namespace WebApi.BLL.Services
         /// <returns>
         /// Response object with status and message with token
         /// </returns>
-        public async Task<Response> LoginAsync(UserLoginModel userLogin)
+        public async Task<TokenDTO> LoginAsync(UserLoginModel userLogin)
         {
             var user = await userManager.FindByNameAsync(userLogin.UserName);
             if (user == null || !await userManager.CheckPasswordAsync(user, userLogin.Password))
@@ -62,10 +62,9 @@ namespace WebApi.BLL.Services
 
             var token = jwtCreationService.GenerateToken(claims);
 
-            return new Response
+            return new TokenDTO
             {
-                Status = "Success",
-                Message = handler.WriteToken(token)
+                Token = handler.WriteToken(token)
             };
         }
 
@@ -77,7 +76,7 @@ namespace WebApi.BLL.Services
         /// <returns>
         /// A response object with a status and message.
         /// </returns>
-        public async Task<Response> RegisterAsync(UserRegisterModel userRegister)
+        public async Task<MessageDTO> RegisterAsync(UserRegisterModel userRegister)
         {
             var userExists = await userManager.FindByNameAsync(userRegister.UserName);
 
@@ -117,7 +116,7 @@ namespace WebApi.BLL.Services
 
             await userManager.AddToRoleAsync(user, "User");
 
-            return new Response() { Status = "Success", Message = "User created successfully!" };
+            return new MessageDTO() { Message = "User created successfully!" };
         }
 
         /// <summary>
@@ -128,7 +127,7 @@ namespace WebApi.BLL.Services
         /// <returns>
         /// A response object with a status and message.
         /// </returns>
-        public async Task<Response> RegisterAdminAsync(UserRegisterModel userRegister)
+        public async Task<MessageDTO> RegisterAdminAsync(UserRegisterModel userRegister)
         {
             var adminExists = await userManager.FindByNameAsync(userRegister.UserName);
 
@@ -158,7 +157,7 @@ namespace WebApi.BLL.Services
 
             await userManager.AddToRoleAsync(user, "Admin");
 
-            return new Response() { Status = "Success", Message = "Admin created successfully!" };
+            return new MessageDTO() { Message = "Admin created successfully!" };
         }
 
     }
