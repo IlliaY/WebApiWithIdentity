@@ -1,6 +1,7 @@
 using System.Text;
 using FluentValidation;
 using Hellang.Middleware.ProblemDetails;
+using Hellang.Middleware.ProblemDetails.Mvc;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -17,6 +18,7 @@ using WebApi.BLL.Services;
 using WebApi.BLL.Validators;
 using WebApi.DAL.Data;
 using WebApi.DAL.Interfaces;
+using WebApi.PL.Configurations;
 
 namespace WebApi.PL
 {
@@ -31,12 +33,12 @@ namespace WebApi.PL
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers().AddProblemDetailsConventions().AddJsonOptions(x => x.JsonSerializerOptions.IgnoreNullValues = true);
 
             // A middleware that return a problem details object when an exception is thrown.
             services.AddProblemDetails(options =>
             {
-
+                options.MapFluentValidationException();
             });
 
             //add cors
@@ -107,8 +109,11 @@ namespace WebApi.PL
             //configure jwtservice
             services.AddScoped<IJwtCreationService, JwtCreationService>();
 
-            //add validator
+            //add validator for user login
             services.AddScoped<IValidator<UserLoginModel>, UserLoginValidator>();
+
+            //add validator for user register
+            services.AddScoped<IValidator<UserRegisterModel>, UserRegisterValidator>();
 
         }
 

@@ -21,7 +21,8 @@ namespace WebApi.BLL.Services
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly IConfiguration configuration;
         private readonly IJwtCreationService jwtCreationService;
-        private readonly IValidator<UserLoginModel> validator;
+        private readonly IValidator<UserLoginModel> validatorLogin;
+        private readonly IValidator<UserRegisterModel> validatorRegister;
 
         public AuthService
         (
@@ -29,14 +30,16 @@ namespace WebApi.BLL.Services
             UserManager<IdentityUser> userManager,
             IConfiguration configuration,
             IJwtCreationService jwtCreationService,
-            IValidator<UserLoginModel> validator
+            IValidator<UserLoginModel> validatorLogin,
+            IValidator<UserRegisterModel> validatorRegister
         )
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
             this.configuration = configuration;
             this.jwtCreationService = jwtCreationService;
-            this.validator = validator;
+            this.validatorLogin = validatorLogin;
+            this.validatorRegister = validatorRegister;
         }
 
         /// <summary>
@@ -49,11 +52,11 @@ namespace WebApi.BLL.Services
         /// </returns>
         public async Task<TokenDTO> LoginAsync(UserLoginModel userLogin)
         {
-            await validator.ValidateAndThrowAsync(userLogin);
+            await validatorLogin.ValidateAndThrowAsync(userLogin);
             var user = await userManager.FindByNameAsync(userLogin.UserName);
             if (user == null || !await userManager.CheckPasswordAsync(user, userLogin.Password))
             {
-                throw new Exception("Invalid username or password");
+                throw new Exception("Wrong username or password");
             }
             var userRoles = await userManager.GetRolesAsync(user);
 
@@ -89,6 +92,8 @@ namespace WebApi.BLL.Services
         /// </returns>
         public async Task<MessageDTO> RegisterAsync(UserRegisterModel userRegister)
         {
+            await validatorRegister.ValidateAndThrowAsync(userRegister);
+
             var userExists = await userManager.FindByNameAsync(userRegister.UserName);
 
             if (userExists != null)
@@ -140,6 +145,8 @@ namespace WebApi.BLL.Services
         /// </returns>
         public async Task<MessageDTO> RegisterAdminAsync(UserRegisterModel userRegister)
         {
+            await validatorRegister.ValidateAndThrowAsync(userRegister);
+
             var adminExists = await userManager.FindByNameAsync(userRegister.UserName);
 
             if (adminExists != null)
