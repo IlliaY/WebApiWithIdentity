@@ -1,12 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using FluentValidation;
+using Hellang.Middleware.ProblemDetails;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +12,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using WebApi.BLL.Interfaces;
+using WebApi.BLL.Models;
 using WebApi.BLL.Services;
+using WebApi.BLL.Validators;
 using WebApi.DAL.Data;
 using WebApi.DAL.Interfaces;
 
@@ -33,6 +32,12 @@ namespace WebApi.PL
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            // A middleware that return a problem details object when an exception is thrown.
+            services.AddProblemDetails(options =>
+            {
+
+            });
 
             //add cors
             services.AddCors(options =>
@@ -96,11 +101,14 @@ namespace WebApi.PL
             services.Configure<ApiBehaviorOptions>(
                 options =>
             {
-                options.SuppressModelStateInvalidFilter = true;
+                options.SuppressModelStateInvalidFilter = false;
             });
 
             //configure jwtservice
             services.AddScoped<IJwtCreationService, JwtCreationService>();
+
+            //add validator
+            services.AddScoped<IValidator<UserLoginModel>, UserLoginValidator>();
 
         }
 
@@ -113,8 +121,10 @@ namespace WebApi.PL
                 app.UseSwaggerUI();
             }
 
+
             app.UseRouting();
 
+            app.UseProblemDetails();
             app.UseCors(options =>
             {
                 options.AllowAnyOrigin();

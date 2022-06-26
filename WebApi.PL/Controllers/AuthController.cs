@@ -35,15 +35,8 @@ namespace WebApi.PL.Controllers
         [ValidationFilter]
         public async Task<IActionResult> Register(UserRegisterModel userRegister)
         {
-            try
-            {
-                var response = await authService.RegisterAsync(userRegister);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var response = await authService.RegisterAsync(userRegister);
+            return Ok(response);
         }
 
         /// <summary>
@@ -57,18 +50,10 @@ namespace WebApi.PL.Controllers
         /// </returns>
         [HttpPost]
         [Route("Login")]
-        [ValidationFilter]
         public async Task<IActionResult> Login(UserLoginModel userLogin)
         {
-            try
-            {
-                var response = await authService.LoginAsync(userLogin);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var response = await authService.LoginAsync(userLogin);
+            return Ok(response);
         }
 
         /// <summary>
@@ -81,19 +66,11 @@ namespace WebApi.PL.Controllers
         /// </returns>
         [HttpPost]
         [Route("RegisterAdmin")]
-        [ValidationFilter]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RegisterAdmin(UserRegisterModel userRegister)
         {
-            try
-            {
-                var response = await authService.RegisterAdminAsync(userRegister);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var response = await authService.RegisterAdminAsync(userRegister);
+            return Ok(response);
         }
     }
 }

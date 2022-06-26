@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -20,13 +21,22 @@ namespace WebApi.BLL.Services
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly IConfiguration configuration;
         private readonly IJwtCreationService jwtCreationService;
+        private readonly IValidator<UserLoginModel> validator;
 
-        public AuthService(RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager, IConfiguration configuration, IJwtCreationService jwtCreationService)
+        public AuthService
+        (
+            RoleManager<IdentityRole> roleManager,
+            UserManager<IdentityUser> userManager,
+            IConfiguration configuration,
+            IJwtCreationService jwtCreationService,
+            IValidator<UserLoginModel> validator
+        )
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
             this.configuration = configuration;
             this.jwtCreationService = jwtCreationService;
+            this.validator = validator;
         }
 
         /// <summary>
@@ -39,6 +49,7 @@ namespace WebApi.BLL.Services
         /// </returns>
         public async Task<TokenDTO> LoginAsync(UserLoginModel userLogin)
         {
+            await validator.ValidateAndThrowAsync(userLogin);
             var user = await userManager.FindByNameAsync(userLogin.UserName);
             if (user == null || !await userManager.CheckPasswordAsync(user, userLogin.Password))
             {
