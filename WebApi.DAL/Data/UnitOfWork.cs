@@ -12,9 +12,9 @@ namespace WebApi.DAL.Data
         {
             this.context = context;
         }
-        public UserManager<IdentityUser> UserManager { get; set; }
+        public UserManager<IdentityUser> UserManager { get; }
 
-        public RoleManager<IdentityRole> RoleManager { get; set; }
+        public RoleManager<IdentityRole> RoleManager { get; }
 
         public async Task SaveAsync()
         {
