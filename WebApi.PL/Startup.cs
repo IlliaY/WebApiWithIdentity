@@ -93,11 +93,15 @@ namespace WebApi.PL
             //add swagger
             services.AddSwaggerGen();
 
-            //add unit of work
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             //add users manager
             services.AddScoped<UserManager<IdentityUser>, UserManager<IdentityUser>>();
+
+            //add roles manager
+            services.AddScoped<RoleManager<IdentityRole>, RoleManager<IdentityRole>>();
+
+            //add unit of work
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             //add AuthService
             services.AddScoped<IAuthService, AuthService>();

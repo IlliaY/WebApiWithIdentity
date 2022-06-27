@@ -8,13 +8,16 @@ namespace WebApi.DAL.Data
     {
         private readonly ApplicationContext context;
 
-        public UnitOfWork(ApplicationContext context)
-        {
-            this.context = context;
-        }
         public UserManager<IdentityUser> UserManager { get; }
 
         public RoleManager<IdentityRole> RoleManager { get; }
+
+        public UnitOfWork(ApplicationContext context, RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager)
+        {
+            this.context = context;
+            RoleManager = roleManager;
+            UserManager = userManager;
+        }
 
         public async Task SaveAsync()
         {
