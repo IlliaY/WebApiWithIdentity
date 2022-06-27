@@ -32,7 +32,6 @@ namespace WebApi.PL.Controllers
         /// </returns>
         [HttpPost]
         [Route("Register")]
-        [ValidationFilter]
         public async Task<IActionResult> Register(UserRegisterModel userRegister)
         {
             var response = await authService.RegisterAsync(userRegister);

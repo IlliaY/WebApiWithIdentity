@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using FluentValidation;
 using Hellang.Middleware.ProblemDetails;
@@ -40,6 +41,11 @@ namespace WebApi.PL
             {
                 options.MapFluentValidationException();
                 options.IncludeExceptionDetails = (con, action) => false;
+                options.Map<Exception>((ctx, ex) =>
+                {
+                    var factory = ctx.RequestServices.GetRequiredService<ProblemDetailsFactory>();
+                    return factory.CreateProblemDetails(ctx, ctx.Response.StatusCode, ex.Message, "https://httpstatuses.io/500");
+                });
             });
 
             //add cors
