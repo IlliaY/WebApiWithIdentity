@@ -1,7 +1,9 @@
 using FluentValidation;
 using Hellang.Middleware.ProblemDetails;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Linq;
+using WebApi.BLL.Exceptions;
 
 namespace WebApi.PL.Configurations
 {
@@ -19,6 +21,13 @@ namespace WebApi.PL.Configurations
                         x => x.Select(x => x.ErrorMessage).ToArray());
 
                 return factory.CreateValidationProblemDetails(ctx, errors);
+            });
+
+        public static void MapAuthentificationException(this ProblemDetailsOptions options) =>
+            options.Map<AuthentificationException>((ctx, ex) =>
+            {
+                var factory = ctx.RequestServices.GetRequiredService<ProblemDetailsFactory>();
+                return factory.CreateProblemDetails(ctx, ctx.Response.StatusCode, ex.Message);
             });
     }
 
