@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using WebApi.BLL.Exceptions;
 using WebApi.BLL.Interfaces;
 using WebApi.BLL.Models;
 
@@ -56,7 +57,7 @@ namespace WebApi.BLL.Services
             var user = await userManager.FindByNameAsync(userLogin.UserName);
             if (user == null || !await userManager.CheckPasswordAsync(user, userLogin.Password))
             {
-                throw new Exception("Wrong username or password");
+                throw new AuthentificationException("Wrong username or password");
             }
             var userRoles = await userManager.GetRolesAsync(user);
 
@@ -98,7 +99,7 @@ namespace WebApi.BLL.Services
 
             if (userExists != null)
             {
-                throw new Exception("User already exists");
+                throw new AuthentificationException("User already exists");
             }
 
             IdentityUser user = new IdentityUser
@@ -112,17 +113,7 @@ namespace WebApi.BLL.Services
 
             if (!result.Succeeded)
             {
-                throw new Exception("Error creating user");
-            }
-
-            if (!result.Succeeded)
-            {
-                var errorList = new List<string>();
-                foreach (var error in result.Errors)
-                {
-                    errorList.Add(error.Description);
-                }
-                throw new Exception(JsonSerializer.Serialize(errorList));
+                throw new AuthentificationException("Error creating user");
             }
 
             if (!await roleManager.RoleExistsAsync("User"))
@@ -151,7 +142,7 @@ namespace WebApi.BLL.Services
 
             if (adminExists != null)
             {
-                throw new Exception("Admin already exists");
+                throw new AuthentificationException("Admin already exists");
             }
 
             IdentityUser user = new IdentityUser
@@ -165,7 +156,7 @@ namespace WebApi.BLL.Services
 
             if (!result.Succeeded)
             {
-                throw new Exception("Error creating user");
+                throw new AuthentificationException("Error creating user");
             }
 
             if (!await roleManager.RoleExistsAsync("Admin"))
