@@ -6,8 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using WebApi.BLL.Interfaces;
 
-namespace WebApi.BLL.Interfaces
+namespace WebApi.BLL.Services
 {
     public class JwtCreationService : IJwtCreationService
     {
