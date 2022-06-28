@@ -51,7 +51,7 @@ namespace WebApi.BLL.Services
         public async Task<TokenDTO> LoginAsync(UserLoginModel userLogin)
         {
             await validatorLogin.ValidateAndThrowAsync(userLogin);
-            // var user = await userManager.FindByNameAsync(userLogin.UserName);
+
             var user = await unitOfWork.UserManager.FindByNameAsync(userLogin.UserName);
 
             if (user == null || !await unitOfWork.UserManager.CheckPasswordAsync(user, userLogin.Password))
