@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using NUnit.Framework;
+using WebApi.BLL.Exceptions;
 using WebApi.BLL.Interfaces;
 using WebApi.BLL.Models;
 using WebApi.BLL.Services;
@@ -91,5 +92,34 @@ namespace WebApi.Tests
             token.Should().NotBeNull();
         }
 
+        [Test]
+        [TestCase("UserThatDoesn'tExist")]
+        [TestCase("UserThatDoesn'tExist2")]
+        public async Task AuthService_LoginAsync_ThrowsAuthorizationExceptionIfThereIsNoUserWithInsertedUsername(string name)
+        {
+            //Arrange
+            var context = new ApplicationContext(await GetUnitTestDbContextOptions());
+            var userStoreMock = new Mock<IUserStore<IdentityUser>>();
+            var userManagerMock = new Mock<UserManager<IdentityUser>>(userStoreMock.Object, null, null, null, null, null, null, null, null);
+            var unitOfWorkMock = new Mock<UnitOfWork>(context, null, userManagerMock.Object);
+            var userLoginValidatorMock = new Mock<IValidator<UserLoginModel>>();
+            var userRegisterValidatorMock = new Mock<IValidator<UserRegisterModel>>();
+
+            var jwtCreationService = new JwtCreationService(configuration);
+
+            var authService = new AuthService(configuration, jwtCreationService, userLoginValidatorMock.Object, userRegisterValidatorMock.Object, unitOfWorkMock.Object);
+
+            var userLogin = new UserLoginModel()
+            {
+                UserName = name,
+                Password = "password"
+            };
+
+            //Act
+            Func<Task> loginAsync = async () => await authService.LoginAsync(userLogin);
+
+            //Assert
+            await loginAsync.Should().ThrowAsync<AuthentificationException>().WithMessage("Wrong username or password");
+        }
     }
 }
