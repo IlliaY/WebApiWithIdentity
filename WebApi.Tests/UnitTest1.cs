@@ -72,10 +72,12 @@ namespace WebApi.Tests
             userManagerMock.Setup(userManager => userManager.CheckPasswordAsync(expected, expected.PasswordHash)).ReturnsAsync(true);
             userManagerMock.Setup(userManager => userManager.GetRolesAsync(expected)).ReturnsAsync(new List<string>() { "User" });
             var unitOfWorkMock = new Mock<UnitOfWork>(context, null, userManagerMock.Object);
+            var userLoginValidatorMock = new Mock<IValidator<UserLoginModel>>();
+            var userRegisterValidatorMock = new Mock<IValidator<UserRegisterModel>>();
 
             var jwtCreationService = new JwtCreationService(configuration);
 
-            var authService = new AuthService(configuration, jwtCreationService, null, null, unitOfWorkMock.Object);
+            var authService = new AuthService(configuration, jwtCreationService, userLoginValidatorMock.Object, userRegisterValidatorMock.Object, unitOfWorkMock.Object);
 
             var userLogin = new UserLoginModel()
             {
