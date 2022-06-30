@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentValidation;
+using FluentValidation.TestHelper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -13,6 +15,7 @@ using WebApi.BLL.Exceptions;
 using WebApi.BLL.Interfaces;
 using WebApi.BLL.Models;
 using WebApi.BLL.Services;
+using WebApi.BLL.Validators;
 using WebApi.DAL.Data;
 using WebApi.DAL.Interfaces;
 
@@ -120,6 +123,120 @@ namespace WebApi.Tests
 
             //Assert
             await loginAsync.Should().ThrowAsync<AuthentificationException>().WithMessage("Wrong username or password");
+        }
+
+        [Test]
+        public void AuthService_LoginAsync_ThrowsValidationExceptionIfUsernameIsEmpty()
+        {
+            //Arrange
+            var userLoginValidator = new UserLoginValidator();
+
+            var userLogin = new UserLoginModel()
+            {
+                UserName = String.Empty,
+                Password = "password"
+            };
+
+            //Act
+            var validationTest = userLoginValidator.TestValidate(userLogin);
+
+            //Assert
+            validationTest.ShouldHaveValidationErrorFor(user => user.UserName);
+        }
+
+        [Test]
+        public void AuthService_LoginAsync_ThrowsValidationExceptionIfUsernameIsNull()
+        {
+            //Arrange
+            var userLoginValidator = new UserLoginValidator();
+
+            var userLogin = new UserLoginModel()
+            {
+                UserName = null,
+                Password = "password"
+            };
+
+            //Act
+            var validationTest = userLoginValidator.TestValidate(userLogin);
+
+            //Assert
+            validationTest.ShouldHaveValidationErrorFor(user => user.UserName);
+        }
+
+        [Test]
+        public void AuthService_LoginAsync_ThrowsValidationExceptionIfUsernameIsLessThan3Symbols()
+        {
+            //Arrange
+            var userLoginValidator = new UserLoginValidator();
+
+            var userLogin = new UserLoginModel()
+            {
+                UserName = "12",
+                Password = "password"
+            };
+
+            //Act
+            var validationTest = userLoginValidator.TestValidate(userLogin);
+
+            //Assert
+            validationTest.ShouldHaveValidationErrorFor(user => user.UserName);
+        }
+
+        [Test]
+        public void AuthService_LoginAsync_ThrowsValidationExceptionIfUsernameIsMoreThan20()
+        {
+            //Arrange
+            var userLoginValidator = new UserLoginValidator();
+
+            var userLogin = new UserLoginModel()
+            {
+                UserName = "123456789123456789123456789",
+                Password = "password"
+            };
+
+            //Act
+            var validationTest = userLoginValidator.TestValidate(userLogin);
+
+            //Assert
+            validationTest.ShouldHaveValidationErrorFor(user => user.UserName);
+        }
+
+        [Test]
+        public void AuthService_LoginAsync_ThrowsValidationExceptionIfPasswordIsEmpty()
+        {
+            //Arrange
+            var userLoginValidator = new UserLoginValidator();
+
+            var userLogin = new UserLoginModel()
+            {
+                UserName = "12345678",
+                Password = String.Empty,
+            };
+
+            //Act
+            var validationTest = userLoginValidator.TestValidate(userLogin);
+
+            //Assert
+            validationTest.ShouldHaveValidationErrorFor(user => user.Password);
+        }
+
+        [Test]
+        public void AuthService_LoginAsync_ThrowsValidationExceptionIfPasswordIsNull()
+        {
+            //Arrange
+            var userLoginValidator = new UserLoginValidator();
+
+            var userLogin = new UserLoginModel()
+            {
+                UserName = "12345678",
+                Password = null,
+            };
+
+            //Act
+            var validationTest = userLoginValidator.TestValidate(userLogin);
+
+            //Assert
+            validationTest.ShouldHaveValidationErrorFor(user => user.Password);
         }
     }
 }
