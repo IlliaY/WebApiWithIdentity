@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using WebApi.DAL.Interfaces;
+using WebApi.DAL.Repositories;
 
 namespace WebApi.DAL.Data
 {
@@ -8,15 +9,15 @@ namespace WebApi.DAL.Data
     {
         private readonly ApplicationContext context;
 
-        public UserManager<IdentityUser> UserManager { get; }
+        public IUserRepository UserRepository { get; }
 
-        public RoleManager<IdentityRole> RoleManager { get; }
+        public IRoleRepository RoleRepository { get; }
 
         public UnitOfWork(ApplicationContext context, RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager)
         {
             this.context = context;
-            RoleManager = roleManager;
-            UserManager = userManager;
+            UserRepository = new UserRepository(userManager);
+            RoleRepository = new RoleRepository(roleManager);
         }
 
         public async Task SaveAsync()

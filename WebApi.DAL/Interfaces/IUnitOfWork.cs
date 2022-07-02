@@ -5,8 +5,9 @@ namespace WebApi.DAL.Interfaces
 {
     public interface IUnitOfWork
     {
-        UserManager<IdentityUser> UserManager { get; }
-        RoleManager<IdentityRole> RoleManager { get; }
+        public IUserRepository UserRepository { get; }
+
+        public IRoleRepository RoleRepository { get; }
         Task SaveAsync();
     }
 }

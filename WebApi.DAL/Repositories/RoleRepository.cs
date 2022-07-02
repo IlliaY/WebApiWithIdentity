@@ -8,7 +8,7 @@ using WebApi.DAL.Interfaces;
 
 namespace WebApi.DAL.Repositories
 {
-    class RoleRepository : IRoleRepository
+    public class RoleRepository : IRoleRepository
     {
         private readonly RoleManager<IdentityRole> roleManager;
 
