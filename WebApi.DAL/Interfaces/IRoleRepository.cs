@@ -5,7 +5,7 @@ namespace WebApi.DAL.Interfaces
 {
     public interface IRoleRepository : IRepository<IdentityRole>
     {
-        Task<bool> RoleExistsAsync();
-        Task<IdentityResult> CreateRoleAsync();
+        Task<bool> RoleExistsAsync(string roleName);
+        Task<IdentityResult> CreateRoleAsync(IdentityRole role);
     }
 }
