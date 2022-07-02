@@ -58,6 +58,7 @@ namespace WebApi.BLL.Services
             {
                 throw new AuthentificationException("Wrong username or password");
             }
+
             var userRoles = await unitOfWork.UserRepository.GetRolesAsync(user);
 
             var claims = new List<Claim>

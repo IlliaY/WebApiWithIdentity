@@ -76,9 +76,11 @@ namespace WebApi.Tests
             unitOfWorkMock
                 .Setup(unitOfWork => unitOfWork.UserRepository.FindByNameAsync(It.IsAny<string>()))
                 .ReturnsAsync(expected);
+
             unitOfWorkMock
                 .Setup(unitOfWork => unitOfWork.UserRepository.CheckPasswordAsync(It.IsAny<IdentityUser>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
+
             unitOfWorkMock
                 .Setup(unitOfWork => unitOfWork.UserRepository.GetRolesAsync(It.IsAny<IdentityUser>()))
                 .ReturnsAsync(new List<string>() { "User" });
@@ -107,15 +109,20 @@ namespace WebApi.Tests
         {
             //Arrange
             var context = new ApplicationContext(await GetUnitTestDbContextOptionsAsync());
-            var userStoreMock = new Mock<IUserStore<IdentityUser>>();
-            var userManagerMock = new Mock<UserManager<IdentityUser>>(userStoreMock.Object, null, null, null, null, null, null, null, null);
-            var unitOfWorkMock = new Mock<UnitOfWork>(context, null, userManagerMock.Object);
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
             var userLoginValidatorMock = new Mock<IValidator<UserLoginModel>>();
-            var userRegisterValidatorMock = new Mock<IValidator<UserRegisterModel>>();
+
+            unitOfWorkMock
+                .Setup(unitOfWork => unitOfWork.UserRepository.CheckPasswordAsync(It.IsAny<IdentityUser>(), It.IsAny<string>()))
+                .ReturnsAsync(false);
+
+            unitOfWorkMock
+                .Setup(unitOfWork => unitOfWork.UserRepository.FindByNameAsync(It.IsAny<string>()))
+                .ReturnsAsync((IdentityUser)null);
 
             var jwtCreationService = new JwtCreationService(configuration);
 
-            var authService = new AuthService(configuration, jwtCreationService, userLoginValidatorMock.Object, userRegisterValidatorMock.Object, unitOfWorkMock.Object);
+            var authService = new AuthService(configuration, jwtCreationService, userLoginValidatorMock.Object, null, unitOfWorkMock.Object);
 
             var userLogin = new UserLoginModel()
             {
@@ -252,17 +259,24 @@ namespace WebApi.Tests
             //Arrange
             var context = new ApplicationContext(await GetUnitTestDbContextOptionsAsync());
             var expected = new MessageDTO() { Message = "User created successfully!" };
-            var userStoreMock = new Mock<IUserStore<IdentityUser>>();
-            var userManagerMock = new Mock<UserManager<IdentityUser>>(userStoreMock.Object, null, null, null, null, null, null, null, null);
-            var roleStoreMock = new Mock<IRoleStore<IdentityRole>>();
-            var roleManagerMock = new Mock<RoleManager<IdentityRole>>(roleStoreMock.Object, null, null, null, null);
-            var unitOfWorkMock = new Mock<UnitOfWork>(context, roleManagerMock.Object, userManagerMock.Object);
-            var userLoginValidatorMock = new Mock<IValidator<UserLoginModel>>();
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
             var userRegisterValidatorMock = new Mock<IValidator<UserRegisterModel>>();
 
             var jwtCreationService = new JwtCreationService(configuration);
 
-            var authService = new AuthService(configuration, jwtCreationService, userLoginValidatorMock.Object, userRegisterValidatorMock.Object, unitOfWorkMock.Object);
+            var authService = new AuthService(configuration, jwtCreationService, null, userRegisterValidatorMock.Object, unitOfWorkMock.Object);
+
+            unitOfWorkMock
+                .Setup(unitOfWork => unitOfWork.UserRepository.FindByNameAsync(It.IsAny<string>()))
+                .ReturnsAsync((IdentityUser)null);
+
+            unitOfWorkMock
+                .Setup(unitOfWork => unitOfWork.UserRepository.CreateUserAsync(It.IsAny<IdentityUser>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
+
+            unitOfWorkMock
+                .Setup(unitOfWork => unitOfWork.RoleRepository.RoleExistsAsync(It.IsAny<string>()))
+                .ReturnsAsync(true);
 
             var userRegister = new UserRegisterModel()
             {
@@ -271,8 +285,6 @@ namespace WebApi.Tests
                 Password = password
             };
 
-            userManagerMock.Setup(userManager => userManager.CreateAsync(It.IsAny<IdentityUser>(), password)).ReturnsAsync(IdentityResult.Success);
-            roleManagerMock.Setup(roleManager => roleManager.RoleExistsAsync(It.IsAny<string>())).ReturnsAsync(true);
             //Act
             var message = await authService.RegisterAsync(userRegister);
 
@@ -287,17 +299,12 @@ namespace WebApi.Tests
         {
             //Arrange
             var context = new ApplicationContext(await GetUnitTestDbContextOptionsAsync());
-            var userStoreMock = new Mock<IUserStore<IdentityUser>>();
-            var userManagerMock = new Mock<UserManager<IdentityUser>>(userStoreMock.Object, null, null, null, null, null, null, null, null);
-            var roleStoreMock = new Mock<IRoleStore<IdentityRole>>();
-            var roleManagerMock = new Mock<RoleManager<IdentityRole>>(roleStoreMock.Object, null, null, null, null);
-            var unitOfWorkMock = new Mock<UnitOfWork>(context, roleManagerMock.Object, userManagerMock.Object);
-            var userLoginValidatorMock = new Mock<IValidator<UserLoginModel>>();
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
             var userRegisterValidatorMock = new Mock<IValidator<UserRegisterModel>>();
 
-            var jwtCreationService = new JwtCreationService(configuration);
+            unitOfWorkMock.Setup(unitOfWork => unitOfWork.UserRepository.FindByNameAsync(It.IsAny<string>())).ReturnsAsync(new IdentityUser(name));
 
-            var authService = new AuthService(configuration, jwtCreationService, userLoginValidatorMock.Object, userRegisterValidatorMock.Object, unitOfWorkMock.Object);
+            var authService = new AuthService(configuration, null, null, userRegisterValidatorMock.Object, unitOfWorkMock.Object);
 
             var userRegister = new UserRegisterModel()
             {
@@ -308,13 +315,13 @@ namespace WebApi.Tests
 
             var identityUser = new IdentityUser(name);
 
-            userManagerMock.Setup(userManager => userManager.FindByNameAsync(It.IsAny<string>())).ReturnsAsync(identityUser);
-
             //Act
             Func<Task> registerAsync = async () => await authService.RegisterAsync(userRegister);
 
             //Assert
             await registerAsync.Should().ThrowAsync<AuthentificationException>().WithMessage("User already exists");
         }
+
+
     }
 }
