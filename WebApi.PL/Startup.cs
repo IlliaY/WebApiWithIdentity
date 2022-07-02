@@ -19,6 +19,7 @@ using WebApi.BLL.Services;
 using WebApi.BLL.Validators;
 using WebApi.DAL.Data;
 using WebApi.DAL.Interfaces;
+using WebApi.DAL.Repositories;
 using WebApi.PL.Configurations;
 
 namespace WebApi.PL
@@ -93,6 +94,12 @@ namespace WebApi.PL
             //add swagger
             services.AddSwaggerGen();
 
+            //add users repository
+            services.AddScoped<IUserRepository, UserRepository>();
+
+
+            //add users repository
+            services.AddScoped<IRoleRepository, RoleRepository>();
 
             //add users manager
             services.AddScoped<UserManager<IdentityUser>, UserManager<IdentityUser>>();
