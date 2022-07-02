@@ -70,24 +70,29 @@ namespace WebApi.Tests
             //Arrange
             var context = new ApplicationContext(await GetUnitTestDbContextOptionsAsync());
             var expected = await context.Users.FirstAsync(user => user.UserName == name);
-            var userStoreMock = new Mock<IUserStore<IdentityUser>>();
-            var userManagerMock = new Mock<UserManager<IdentityUser>>(userStoreMock.Object, null, null, null, null, null, null, null, null);
-            userManagerMock.Setup(userManager => userManager.FindByNameAsync(name)).ReturnsAsync(expected);
-            userManagerMock.Setup(userManager => userManager.CheckPasswordAsync(expected, expected.PasswordHash)).ReturnsAsync(true);
-            userManagerMock.Setup(userManager => userManager.GetRolesAsync(expected)).ReturnsAsync(new List<string>() { "User" });
-            var unitOfWorkMock = new Mock<UnitOfWork>(context, null, userManagerMock.Object);
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
             var userLoginValidatorMock = new Mock<IValidator<UserLoginModel>>();
-            var userRegisterValidatorMock = new Mock<IValidator<UserRegisterModel>>();
+
+            unitOfWorkMock
+                .Setup(unitOfWork => unitOfWork.UserRepository.FindByNameAsync(It.IsAny<string>()))
+                .ReturnsAsync(expected);
+            unitOfWorkMock
+                .Setup(unitOfWork => unitOfWork.UserRepository.CheckPasswordAsync(It.IsAny<IdentityUser>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+            unitOfWorkMock
+                .Setup(unitOfWork => unitOfWork.UserRepository.GetRolesAsync(It.IsAny<IdentityUser>()))
+                .ReturnsAsync(new List<string>() { "User" });
 
             var jwtCreationService = new JwtCreationService(configuration);
 
-            var authService = new AuthService(configuration, jwtCreationService, userLoginValidatorMock.Object, userRegisterValidatorMock.Object, unitOfWorkMock.Object);
+            var authService = new AuthService(configuration, jwtCreationService, userLoginValidatorMock.Object, null, unitOfWorkMock.Object);
 
             var userLogin = new UserLoginModel()
             {
                 UserName = name,
                 Password = "password"
             };
+
             //Act
             var token = await authService.LoginAsync(userLogin);
 
