@@ -9,15 +9,15 @@ namespace WebApi.DAL.Interfaces
     {
         Task<IEnumerable<TEntity>> GetAllAsync();
 
-        Task<TEntity> GetByIdAsync(int id);
+        Task<TEntity> GetByIdAsync(string id);
 
         Task AddAsync(TEntity entity);
 
-        void Delete(TEntity entity);
+        Task DeleteAsync(TEntity entity);
 
-        Task DeleteByIdAsync(int id);
+        Task DeleteByIdAsync(string id);
 
-        void Update(TEntity entity);
+        Task UpdateAsync(TEntity entity);
         IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
     }
 }

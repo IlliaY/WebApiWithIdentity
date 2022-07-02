@@ -6,10 +6,10 @@ namespace WebApi.DAL.Interfaces
 {
     public interface IUserRepository : IRepository<IdentityUser>
     {
-        Task<IdentityUser> FindByNameAsync();
-        Task<List<string>> GetRolesAsync();
-        Task<bool> CheckPasswordAsync();
-        Task<IdentityResult> CreateUserAsync();
-        Task<IdentityResult> AddToRoleAsync();
+        Task<IdentityUser> FindByNameAsync(string name);
+        Task<IList<string>> GetRolesAsync(IdentityUser user);
+        Task<bool> CheckPasswordAsync(IdentityUser user, string password);
+        Task<IdentityResult> CreateUserAsync(IdentityUser user, string password);
+        Task<IdentityResult> AddToRoleAsync(IdentityUser user, string roleName);
     }
 }
