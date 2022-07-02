@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace WebApi.DAL.Interfaces
 {
-    public interface IRolesRepository : IRepository<IdentityRole>
+    public interface IRoleRepository : IRepository<IdentityRole>
     {
         Task<bool> RoleExistsAsync();
         Task<IdentityResult> CreateRoleAsync();
