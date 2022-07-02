@@ -52,13 +52,13 @@ namespace WebApi.BLL.Services
         {
             await validatorLogin.ValidateAndThrowAsync(userLogin);
 
-            var user = await unitOfWork.UserManager.FindByNameAsync(userLogin.UserName);
+            var user = await unitOfWork.UserRepository.FindByNameAsync(userLogin.UserName);
 
-            if (user == null || !await unitOfWork.UserManager.CheckPasswordAsync(user, userLogin.Password))
+            if (user == null || !await unitOfWork.UserRepository.CheckPasswordAsync(user, userLogin.Password))
             {
                 throw new AuthentificationException("Wrong username or password");
             }
-            var userRoles = await unitOfWork.UserManager.GetRolesAsync(user);
+            var userRoles = await unitOfWork.UserRepository.GetRolesAsync(user);
 
             var claims = new List<Claim>
                 {
@@ -94,7 +94,7 @@ namespace WebApi.BLL.Services
         {
             await validatorRegister.ValidateAndThrowAsync(userRegister);
 
-            var userExists = await unitOfWork.UserManager.FindByNameAsync(userRegister.UserName);
+            var userExists = await unitOfWork.UserRepository.FindByNameAsync(userRegister.UserName);
 
             if (userExists != null)
             {
@@ -108,19 +108,19 @@ namespace WebApi.BLL.Services
                 SecurityStamp = Guid.NewGuid().ToString()
             };
 
-            var result = await unitOfWork.UserManager.CreateAsync(user, userRegister.Password);
+            var result = await unitOfWork.UserRepository.CreateUserAsync(user, userRegister.Password);
 
             if (!result.Succeeded)
             {
                 throw new AuthentificationException("Error creating user");
             }
 
-            if (!await unitOfWork.RoleManager.RoleExistsAsync("User"))
+            if (!await unitOfWork.RoleRepository.RoleExistsAsync("User"))
             {
-                await unitOfWork.RoleManager.CreateAsync(new IdentityRole("User"));
+                await unitOfWork.RoleRepository.CreateRoleAsync(new IdentityRole("User"));
             }
 
-            await unitOfWork.UserManager.AddToRoleAsync(user, "User");
+            await unitOfWork.UserRepository.AddToRoleAsync(user, "User");
 
             return new MessageDTO() { Message = "User created successfully!" };
         }
@@ -137,7 +137,7 @@ namespace WebApi.BLL.Services
         {
             await validatorRegister.ValidateAndThrowAsync(userRegister);
 
-            var adminExists = await unitOfWork.UserManager.FindByNameAsync(userRegister.UserName);
+            var adminExists = await unitOfWork.UserRepository.FindByNameAsync(userRegister.UserName);
 
             if (adminExists != null)
             {
@@ -151,19 +151,19 @@ namespace WebApi.BLL.Services
                 SecurityStamp = Guid.NewGuid().ToString()
             };
 
-            var result = await unitOfWork.UserManager.CreateAsync(user, userRegister.Password);
+            var result = await unitOfWork.UserRepository.CreateUserAsync(user, userRegister.Password);
 
             if (!result.Succeeded)
             {
                 throw new AuthentificationException("Error creating user");
             }
 
-            if (!await unitOfWork.RoleManager.RoleExistsAsync("Admin"))
+            if (!await unitOfWork.RoleRepository.RoleExistsAsync("Admin"))
             {
-                await unitOfWork.RoleManager.CreateAsync(new IdentityRole("Admin"));
+                await unitOfWork.RoleRepository.CreateRoleAsync(new IdentityRole("Admin"));
             }
 
-            await unitOfWork.UserManager.AddToRoleAsync(user, "Admin");
+            await unitOfWork.UserRepository.AddToRoleAsync(user, "Admin");
 
             return new MessageDTO() { Message = "Admin created successfully!" };
         }
