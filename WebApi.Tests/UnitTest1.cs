@@ -138,6 +138,25 @@ namespace WebApi.Tests
         }
 
         [Test]
+        public void AuthService_LoginAsync_ValidationSuccessfulIfEveryFieldAreValid()
+        {
+            //Arrange
+            var userLoginValidator = new UserLoginValidator();
+
+            var userLogin = new UserLoginModel()
+            {
+                UserName = "username",
+                Password = "password"
+            };
+
+            //Act
+            var validationTest = userLoginValidator.TestValidate(userLogin);
+
+            //Assert
+            validationTest.ShouldNotHaveAnyValidationErrors();
+        }
+
+        [Test]
         public void AuthService_LoginAsync_ThrowsValidationExceptionIfUsernameIsEmpty()
         {
             //Arrange
@@ -323,5 +342,300 @@ namespace WebApi.Tests
         }
 
 
+        [Test]
+        [TestCase("UserNew1", "email@email.com", "password")]
+        [TestCase("UserNew2", "email1@email.com", "password")]
+        public async Task AuthService_RegisterAsync_ThrowsAuthentificationExceptionIfUserCreationIsNotSuccesful(string name, string email, string password)
+        {
+            //Arrange
+            var context = new ApplicationContext(await GetUnitTestDbContextOptionsAsync());
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
+            var userRegisterValidatorMock = new Mock<IValidator<UserRegisterModel>>();
+
+            unitOfWorkMock
+                .Setup(unitOfWork => unitOfWork.UserRepository.FindByNameAsync(It.IsAny<string>()))
+                .ReturnsAsync((IdentityUser)null);
+
+            unitOfWorkMock
+                .Setup(unitOfWork => unitOfWork.UserRepository.CreateUserAsync(It.IsAny<IdentityUser>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Failed());
+
+            var authService = new AuthService(configuration, null, null, userRegisterValidatorMock.Object, unitOfWorkMock.Object);
+
+            var userRegister = new UserRegisterModel()
+            {
+                UserName = name,
+                Email = email,
+                Password = password
+            };
+
+            var identityUser = new IdentityUser(name);
+
+            //Act
+            Func<Task> registerAsync = async () => await authService.RegisterAsync(userRegister);
+
+            //Assert
+            await registerAsync.Should().ThrowAsync<AuthentificationException>().WithMessage("Error creating user");
+        }
+
+        [Test]
+        public void AuthService_RegisterAsync_ValidationSuccessfulIfEveryFieldAreValid()
+        {
+            //Arrange
+            var userRegisterValidator = new UserRegisterValidator();
+
+            var userRegister = new UserRegisterModel()
+            {
+                UserName = "Username",
+                Password = "P@ssword123!",
+                Email = "randomemail@gmail.com"
+            };
+
+            //Act
+            var validationTest = userRegisterValidator.TestValidate(userRegister);
+
+            //Assert
+            validationTest.ShouldNotHaveAnyValidationErrors();
+        }
+
+        [Test]
+        public void AuthService_RegisterAsync_ThrowsValidationExceptionIfUsernameIsNull()
+        {
+            //Arrange
+            var userRegisterValidator = new UserRegisterValidator();
+
+            var userRegister = new UserRegisterModel()
+            {
+                UserName = null,
+                Password = "P@ssword123!",
+                Email = "randomemail@gmail.com"
+            };
+
+            //Act
+            var validationTest = userRegisterValidator.TestValidate(userRegister);
+
+            //Assert
+            validationTest.ShouldHaveValidationErrorFor(user => user.UserName);
+        }
+
+        [Test]
+        public void AuthService_RegisterAsync_ThrowsValidationExceptionIfUsernameIsEmpty()
+        {
+            //Arrange
+            var userRegisterValidator = new UserRegisterValidator();
+
+            var userRegister = new UserRegisterModel()
+            {
+                UserName = String.Empty,
+                Password = "P@ssword123!",
+                Email = "randomemail@gmail.com"
+            };
+
+            //Act
+            var validationTest = userRegisterValidator.TestValidate(userRegister);
+
+            //Assert
+            validationTest.ShouldHaveValidationErrorFor(user => user.UserName);
+        }
+
+        [Test]
+        public void AuthService_RegisterAsync_ThrowsValidationExceptionIfEmailIsNull()
+        {
+            //Arrange
+            var userRegisterValidator = new UserRegisterValidator();
+
+            var userRegister = new UserRegisterModel()
+            {
+                UserName = "UserName",
+                Password = "P@ssword123!",
+                Email = null
+            };
+
+            //Act
+            var validationTest = userRegisterValidator.TestValidate(userRegister);
+
+            //Assert
+            validationTest.ShouldHaveValidationErrorFor(user => user.Email);
+        }
+
+        [Test]
+        public void AuthService_RegisterAsync_ThrowsValidationExceptionIfEmailIsEmpty()
+        {
+            //Arrange
+            var userRegisterValidator = new UserRegisterValidator();
+
+            var userRegister = new UserRegisterModel()
+            {
+                UserName = "UserName",
+                Password = "P@ssword123!",
+                Email = String.Empty
+            };
+
+            //Act
+            var validationTest = userRegisterValidator.TestValidate(userRegister);
+
+            //Assert
+            validationTest.ShouldHaveValidationErrorFor(user => user.Email);
+        }
+
+        [Test]
+        public void AuthService_RegisterAsync_ThrowsValidationExceptionIfPasswordIsWrongFormat()
+        {
+            //Arrange
+            var userRegisterValidator = new UserRegisterValidator();
+
+            var userRegister = new UserRegisterModel()
+            {
+                UserName = "UserName",
+                Password = "P@ssword123!",
+                Email = "emailemail.com"
+            };
+
+            //Act
+            var validationTest = userRegisterValidator.TestValidate(userRegister);
+
+            //Assert
+            validationTest.ShouldHaveValidationErrorFor(user => user.Email);
+        }
+
+        [Test]
+        public void AuthService_RegisterAsync_ThrowsValidationExceptionIfPasswordIsNull()
+        {
+            //Arrange
+            var userRegisterValidator = new UserRegisterValidator();
+
+            var userRegister = new UserRegisterModel()
+            {
+                UserName = "UserName",
+                Password = null,
+                Email = "email@email.com"
+            };
+
+            //Act
+            var validationTest = userRegisterValidator.TestValidate(userRegister);
+
+            //Assert
+            validationTest.ShouldHaveValidationErrorFor(user => user.Password);
+        }
+
+        [Test]
+        public void AuthService_RegisterAsync_ThrowsValidationExceptionIfPasswordIsEmpty()
+        {
+            //Arrange
+            var userRegisterValidator = new UserRegisterValidator();
+
+            var userRegister = new UserRegisterModel()
+            {
+                UserName = "UserName",
+                Password = String.Empty,
+                Email = "email@email.com"
+            };
+
+            //Act
+            var validationTest = userRegisterValidator.TestValidate(userRegister);
+
+            //Assert
+            validationTest.ShouldHaveValidationErrorFor(user => user.Password);
+        }
+
+        [Test]
+        public void AuthService_RegisterAsync_ThrowsValidationExceptionIfPasswordIsLessThan8Symbols()
+        {
+            //Arrange
+            var userRegisterValidator = new UserRegisterValidator();
+
+            var userRegister = new UserRegisterModel()
+            {
+                UserName = "UserName",
+                Password = "P@s123!",
+                Email = "email@email.com"
+            };
+
+            //Act
+            var validationTest = userRegisterValidator.TestValidate(userRegister);
+
+            //Assert
+            validationTest.ShouldHaveValidationErrorFor(user => user.Password);
+        }
+
+        [Test]
+        public void AuthService_RegisterAsync_ThrowsValidationExceptionIfPasswordDoesNotHaveLowerCaseLetter()
+        {
+            //Arrange
+            var userRegisterValidator = new UserRegisterValidator();
+
+            var userRegister = new UserRegisterModel()
+            {
+                UserName = "UserName",
+                Password = "P@1234123!",
+                Email = "email@email.com"
+            };
+
+            //Act
+            var validationTest = userRegisterValidator.TestValidate(userRegister);
+
+            //Assert
+            validationTest.ShouldHaveValidationErrorFor(user => user.Password);
+        }
+
+        [Test]
+        public void AuthService_RegisterAsync_ThrowsValidationExceptionIfPasswordDoesNotHaveNumber()
+        {
+            //Arrange
+            var userRegisterValidator = new UserRegisterValidator();
+
+            var userRegister = new UserRegisterModel()
+            {
+                UserName = "UserName",
+                Password = "P@sswordqqq",
+                Email = "email@email.com"
+            };
+
+            //Act
+            var validationTest = userRegisterValidator.TestValidate(userRegister);
+
+            //Assert
+            validationTest.ShouldHaveValidationErrorFor(user => user.Password);
+        }
+
+        [Test]
+        public void AuthService_RegisterAsync_ThrowsValidationExceptionIfPasswordDoesNotHaveUpperCaseLetter()
+        {
+            //Arrange
+            var userRegisterValidator = new UserRegisterValidator();
+
+            var userRegister = new UserRegisterModel()
+            {
+                UserName = "UserName",
+                Password = "p@1234123!",
+                Email = "email@email.com"
+            };
+
+            //Act
+            var validationTest = userRegisterValidator.TestValidate(userRegister);
+
+            //Assert
+            validationTest.ShouldHaveValidationErrorFor(user => user.Password);
+        }
+
+        [Test]
+        public void AuthService_RegisterAsync_ThrowsValidationExceptionIfPasswordDoesNotHaveSpecialCharacter()
+        {
+            //Arrange
+            var userRegisterValidator = new UserRegisterValidator();
+
+            var userRegister = new UserRegisterModel()
+            {
+                UserName = "UserName",
+                Password = "Password123456",
+                Email = "email@email.com"
+            };
+
+            //Act
+            var validationTest = userRegisterValidator.TestValidate(userRegister);
+
+            //Assert
+            validationTest.ShouldHaveValidationErrorFor(user => user.Password);
+        }
     }
 }
